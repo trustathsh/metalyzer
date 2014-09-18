@@ -1,0 +1,8 @@
+Metalyzer Release 0.0.1 - 18.09.14
+
+* First protype version
+  - Metalyzer dataservice-module: Can be loaded as a external module by the VisITMeta dataservice application and provides service via a REST-like interface to do statistical (uses R) and semantical analysis
+  - Metalyzer GUI (standalone visualization application): uses JFreeChart to visualize the results.
+  
+* Known Bugs:
+  - Calculation of the mean value of links is not working correctly.
