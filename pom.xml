@@ -141,7 +141,7 @@
     		<dependency>
 				<groupId>de.hshannover.f4.trust</groupId>
 				<artifactId>visitmeta-common</artifactId>
-				<version>0.1.2</version>
+				<version>0.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
