@@ -23,7 +23,7 @@ package de.hshannover.f4.trust.metalyzer.gui;
  * This file is part of metalyzer-visualization, version 0.1.0,
  * implemented by the Trust@HsH research group at the Hochschule Hannover.
  * %%
- * Copyright (C) 2012 - 2013 Trust@FHH
+ * Copyright (C) 2013 - 2015 Trust@HsH
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
