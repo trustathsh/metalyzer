@@ -43,6 +43,12 @@ Prior to building Metalyzer you must install a R runtime on your system and set 
 
 This section describes, how to build Metalyer from scratch.
 
+## Install VisITMeta as a prerequisite
+
+In order to build Metalyzer, you need to install VisITMeta, as some of its code from visitmeta-common is used in Metalyzer.
+To do so, load VisITMeta from our Github page and build it via `$ mvn install` instead of `$ mvn package`.
+After that, the libraries of VisITMeta should reside in your local Maven repository (~/.m2 in most cases).
+
 ## Build Metaylzer
 
 Now you can build Metalyzer via `$ mvn package` in the root directory of the Metalyzer project (the directory

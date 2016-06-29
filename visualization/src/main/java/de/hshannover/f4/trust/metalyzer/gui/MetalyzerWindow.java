@@ -46,7 +46,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,10 +67,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
-import net.java.dev.designgridlayout.DesignGridLayout;
-
 import org.apache.log4j.Logger;
 
+import de.hshannover.f4.trust.ironcommon.properties.Properties;
+import de.hshannover.f4.trust.ironcommon.properties.PropertyException;
 import de.hshannover.f4.trust.metalyzer.MetalyzerStarter;
 import de.hshannover.f4.trust.metalyzer.gui.exporter.PdfExporter;
 import de.hshannover.f4.trust.metalyzer.gui.labels.InfoLabels;
@@ -80,7 +79,7 @@ import de.hshannover.f4.trust.metalyzer.gui.misc.StatusBar;
 import de.hshannover.f4.trust.metalyzer.gui.network.AnalyseConnection;
 import de.hshannover.f4.trust.metalyzer.gui.network.FactoryAnalyseConnection;
 import de.hshannover.f4.trust.metalyzer.gui.network.TimePollService;
-import de.hshannover.f4.trust.visitmeta.util.PropertiesReaderWriter;
+import net.java.dev.designgridlayout.DesignGridLayout;
 
 /**
  * @author Daniel Huelse
@@ -98,7 +97,7 @@ public class MetalyzerWindow extends JFrame {
 	private AnalyseConnection mConnection;
 	private MetalyzerGuiController mGuiController;
 	private MetalyzerPanel mMetalyzerView;
-	private PropertiesReaderWriter mProperties;
+	private Properties mProperties;
 
 	private JMenu mFileMenu;
 	private JMenu mPrefMenu;
@@ -133,7 +132,7 @@ public class MetalyzerWindow extends JFrame {
 			String metalyzerConfig = MetalyzerWindow.class.getClassLoader()
 					.getResource("metalyzerConfig.properties").getPath();
 			log.info("Config file loaded: " + metalyzerConfig);
-			mProperties = new PropertiesReaderWriter(metalyzerConfig, false);
+			mProperties = new Properties(metalyzerConfig);
 		} catch (Exception e) {
 			String msg = "Error while reading the config files";
 			log.fatal(msg);
@@ -144,27 +143,25 @@ public class MetalyzerWindow extends JFrame {
 
 	private void initConnection() {
 		mConnection = FactoryAnalyseConnection.getConnection(
-				mProperties.getProperty("metalyzer.rest.url"),
-				mProperties.getProperty("metalyzer.rest.conn"));
+				mProperties.getString("metalyzer.rest.url", "http://localhost:8000"),
+				mProperties.getString("metalyzer.rest.conn", "localMAPServer"));
 		log.debug("AnalyseConnection initialized");
 
 		mPollService = new TimePollService(
-				mProperties.getProperty("metalyzer.rest.url"),
-				mProperties.getProperty("metalyzer.rest.conn"));
+				mProperties.getString("metalyzer.rest.url", "http://localhost:8000"),
+				mProperties.getString("metalyzer.rest.conn", "localMAPServer"));
 		mPollService.setPollingDelay(Long.parseLong(mProperties
-				.getProperty("metalyzer.poll.delay")));
+				.getString("metalyzer.poll.delay", "5")));
 		mPollService.setRequestTimeout(Long.parseLong(mProperties
-				.getProperty("metalyzer.poll.timeout")));
+				.getString("metalyzer.poll.timeout", "1")));
 	}
 
 	private void initWindow() {
 		mGuiController = new MetalyzerGuiController(mConnection, mPollService);
 		log.debug("GuiController initialized");
 
-		int wndWidth = Integer.parseInt(mProperties
-				.getProperty("metalyzer.wnd.width"));
-		int wndHeight = Integer.parseInt(mProperties
-				.getProperty("metalyzer.wnd.height"));
+		int wndWidth = mProperties.getInt("metalyzer.wnd.width", 1024);
+		int wndHeight = mProperties.getInt("metalyzer.wnd.height", 768);
 		mGuiController.setViewSize(wndWidth, wndHeight);
 
 		this.setTitle("Metalyzer GUI v" + METALYZER_GUI_VERSION);
@@ -181,9 +178,9 @@ public class MetalyzerWindow extends JFrame {
 		JLabel mainElement = new JLabel("");
 		List<JComponent> trailingElements = new ArrayList<JComponent>();
 		trailingElements.add(new JLabel("Connection URL: "
-				+ mProperties.getProperty("metalyzer.rest.url")));
+				+ mProperties.getString("metalyzer.rest.url", "http://localhost:8000")));
 		trailingElements.add(new JLabel("Connection Type: "
-				+ mProperties.getProperty("metalyzer.rest.conn")));
+				+ mProperties.getString("metalyzer.rest.conn", "localMAPServer")));
 		mStatusBar = new StatusBar(mainElement, trailingElements);
 		this.add(mStatusBar, BorderLayout.SOUTH);
 
@@ -240,10 +237,8 @@ public class MetalyzerWindow extends JFrame {
 
 		DesignGridLayout layout = new DesignGridLayout(settingsPanel);
 
-		int width = Integer.parseInt(mProperties
-				.getProperty("metalyzer.wnd.width"));
-		int height = Integer.parseInt(mProperties
-				.getProperty("metalyzer.wnd.height"));
+		int width = mProperties.getInt("metalyzer.wnd.width", 1024);
+		int height = mProperties.getInt("metalyzer.wnd.height", 768);
 		mWidthSpinner = new JSpinner(new SpinnerNumberModel(width, 640, 1920,
 				32));
 		mHeightSpinner = new JSpinner(new SpinnerNumberModel(height, 480, 1080,
@@ -260,10 +255,8 @@ public class MetalyzerWindow extends JFrame {
 		layout.row().grid(new JLabel("Width:")).empty(2).add(mWidthSpinner);
 		layout.row().grid(new JLabel("Height:")).empty(2).add(mHeightSpinner);
 
-		int delay = Integer.parseInt(mProperties
-				.getProperty("metalyzer.poll.delay"));
-		int timeout = Integer.parseInt(mProperties
-				.getProperty("metalyzer.poll.timeout"));
+		int delay = mProperties.getInt("metalyzer.poll.delay", 5);
+		int timeout = mProperties.getInt("metalyzer.poll.timeout", 1);
 		mDelaySpinner = new JSpinner(new SpinnerNumberModel(delay, 1, 20, 1));
 		mTimesoutSpinner = new JSpinner(new SpinnerNumberModel(timeout, 1, 20,
 				1));
@@ -277,7 +270,7 @@ public class MetalyzerWindow extends JFrame {
 
 		mExportPath = new JTextField();
 		mExportPath.setText(mProperties
-				.getProperty("metalyzer.export.path", ""));
+				.getString("metalyzer.export.path", ""));
 		mExportPath.setEditable(false);
 		mExportPath.setBackground(Color.WHITE);
 
@@ -331,7 +324,7 @@ public class MetalyzerWindow extends JFrame {
 			super(text, null);
 			putValue(SHORT_DESCRIPTION, desc);
 			pdfExporter = new PdfExporter(mGuiController,
-					mProperties.getProperty("metalyzer.export.path"));
+					mProperties.getString("metalyzer.export.path", ""));
 		}
 
 		@Override
@@ -386,20 +379,21 @@ public class MetalyzerWindow extends JFrame {
 				int timeout = (int) mTimesoutSpinner.getValue();
 				String path = mExportPath.getText();
 				try {
-					mProperties.storeProperty("metalyzer.wnd.width",
+					mProperties.set("metalyzer.wnd.width",
 							Integer.toString(width));
-					mProperties.storeProperty("metalyzer.wnd.height",
+					mProperties.set("metalyzer.wnd.height",
 							Integer.toString(height));
-					mProperties.storeProperty("metalyzer.poll.delay",
+					mProperties.set("metalyzer.poll.delay",
 							Integer.toString(delay));
-					mProperties.storeProperty("metalyzer.poll.timeout",
+					mProperties.set("metalyzer.poll.timeout",
 							Integer.toString(timeout));
-					mProperties.storeProperty("metalyzer.export.path", path);
+						mProperties.set("metalyzer.export.path", path);
+					} catch (PropertyException e1) {
+						MessageBox.showErrorDialog("Settings Error",
+								"Cannot save the new values.");
+					}
 					log.debug("Settings saved.");
-				} catch (IOException e1) {
-					MessageBox.showErrorDialog("Settings Error",
-							"Cannot save the new values.");
-				}
+				
 			}
 		}
 	}
