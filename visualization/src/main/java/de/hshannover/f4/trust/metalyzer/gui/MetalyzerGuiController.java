@@ -20,10 +20,10 @@ package de.hshannover.f4.trust.metalyzer.gui;
  * Email: trust@f4-i.fh-hannover.de
  * Website: http://trust.f4.hs-hannover.de/
  * 
- * This file is part of metalyzer-visualization, version 0.1.0,
+ * This file is part of metalyzer-visualization, version 0.1.1,
  * implemented by the Trust@HsH research group at the Hochschule Hannover.
  * %%
- * Copyright (C) 2013 - 2015 Trust@HsH
+ * Copyright (C) 2013 - 2016 Trust@HsH
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
